@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DECISIONADOR</title>
+<meta name="description" content="Decide por ti: sí o no, opción 1 u opción 2.">
+<meta name="theme-color" content="#00FFFF">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23FF00FF'/%3E%3Ctext x='50' y='72' font-size='70' font-family='Arial, sans-serif' font-weight='900' text-anchor='middle' fill='%23000'%3E%3F%3C/text%3E%3C/svg%3E">
+<style>
+@font-face {
+	font-family: "Archivo Black";
+	src: url("fonts/archivo-black.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+:root {
+	--bg: #00FFFF;
+	--titulo: #FF00FF;
+	--caja1: #32CD32;
+	--caja2: #FF5F00;
+	--negro: #000;
+	--borde: 8px;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	min-height: 100dvh;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	background: var(--bg);
+	color: var(--negro);
+	font-family: "Archivo Black", Impact, "Arial Black", sans-serif;
+	text-transform: uppercase;
+	transition: background 80ms;
+}
+
+.envoltorio {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 4vw;
+	gap: 2vh;
+	min-height: 0;
+}
+
+h1 {
+	font-size: clamp(2.2rem, 9vw, 9rem);
+	line-height: 0.9;
+	letter-spacing: -0.02em;
+	text-align: center;
+	color: var(--titulo);
+	text-shadow: 8px 8px 0 var(--negro);
+	overflow-wrap: break-word;
+	transition: color 80ms;
+}
+
+.resultado-zona {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 0;
+}
+
+output {
+	display: block;
+	font-size: clamp(4rem, 22vw, 20rem);
+	line-height: 0.9;
+	text-align: center;
+	color: var(--titulo);
+	text-shadow: 8px 8px 0 var(--negro);
+	transition: color 80ms;
+}
+
+output.pop {
+	animation: pop 150ms ease-out;
+}
+
+@keyframes pop {
+	from { transform: scale(0.6); }
+	to { transform: scale(1); }
+}
+
+.botonera {
+	display: flex;
+	flex-direction: row;
+	gap: 3vw;
+}
+
+@media (max-width: 640px) {
+	.botonera {
+		flex-direction: column;
+	}
+}
+
+button {
+	flex: 1;
+	font-family: inherit;
+	text-transform: uppercase;
+	font-size: clamp(1.4rem, 4vw, 3.5rem);
+	color: var(--negro);
+	background: var(--caja1);
+	border: var(--borde) solid var(--negro);
+	box-shadow: 14px 14px 0 var(--negro);
+	padding: 1.2em 0.8em;
+	min-height: 48px;
+	cursor: pointer;
+	transition: transform 80ms, box-shadow 80ms, background 80ms;
+}
+
+button:last-child {
+	background: var(--caja2);
+}
+
+button:hover {
+	transform: translate(4px, 4px);
+	box-shadow: 10px 10px 0 var(--negro);
+}
+
+button:active {
+	transform: translate(14px, 14px);
+	box-shadow: 0 0 0 var(--negro);
+}
+
+button:focus-visible {
+	outline: 6px solid #fff;
+	outline-offset: 4px;
+}
+
+footer {
+	text-align: center;
+	font-size: 0.65rem;
+	padding: 0.5em 0;
+	color: var(--negro);
+	opacity: 0.6;
+}
+
+@media (max-width: 640px) {
+	:root {
+		--borde: 5px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	button, output.pop {
+		transition: none;
+		animation: none;
+	}
+}
+</style>
+</head>
+<body>
+<div class="envoltorio">
+	<h1>Decisionador</h1>
+	<div class="resultado-zona">
+		<output id="resultado" aria-live="polite">?</output>
+	</div>
+	<div class="botonera">
+		<button type="button" id="btn-sino">Sí / No</button>
+		<button type="button" id="btn-varias">Varias opciones</button>
+	</div>
+</div>
+<footer>decisionador.es</footer>
+<script>
+(function () {
+	"use strict";
+
+	var COLORES = ["#00FFFF", "#FF00FF", "#32CD32", "#FF5F00"];
+	var ROLES = ["--bg", "--titulo", "--caja1", "--caja2"];
+	var raiz = document.documentElement;
+	var resultado = document.getElementById("resultado");
+	var reducido = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+	var permutacionActual = null;
+
+	function aleatorio(n) {
+		var buffer = new Uint32Array(1);
+		crypto.getRandomValues(buffer);
+		return buffer[0] % n;
+	}
+
+	function barajar(lista) {
+		var copia = lista.slice();
+		for (var i = copia.length - 1; i > 0; i--) {
+			var j = aleatorio(i + 1);
+			var tmp = copia[i];
+			copia[i] = copia[j];
+			copia[j] = tmp;
+		}
+		return copia;
+	}
+
+	function igual(a, b) {
+		if (!a || !b) return false;
+		for (var i = 0; i < a.length; i++) {
+			if (a[i] !== b[i]) return false;
+		}
+		return true;
+	}
+
+	function nuevaPermutacion() {
+		var candidata;
+		do {
+			candidata = barajar(COLORES);
+		} while (igual(candidata, permutacionActual));
+		permutacionActual = candidata;
+		return candidata;
+	}
+
+	function aplicarPermutacion(permutacion) {
+		for (var i = 0; i < ROLES.length; i++) {
+			raiz.style.setProperty(ROLES[i], permutacion[i]);
+		}
+		var meta = document.querySelector('meta[name="theme-color"]');
+		if (meta) meta.setAttribute("content", permutacion[0]);
+	}
+
+	function elegir(lista) {
+		return lista[aleatorio(lista.length)];
+	}
+
+	function mostrarResultado(texto) {
+		resultado.textContent = texto;
+		if (!reducido) {
+			resultado.classList.remove("pop");
+			void resultado.offsetWidth;
+			resultado.classList.add("pop");
+		}
+	}
+
+	function manejarClick(lista) {
+		return function () {
+			aplicarPermutacion(nuevaPermutacion());
+			mostrarResultado(elegir(lista));
+		};
+	}
+
+	document.getElementById("btn-sino").addEventListener("click", manejarClick(["SÍ", "NO"]));
+	document.getElementById("btn-varias").addEventListener("click", manejarClick(["OPCIÓN 1", "OPCIÓN 2"]));
+
+	aplicarPermutacion(nuevaPermutacion());
+}());
+</script>
+</body>
+</html>

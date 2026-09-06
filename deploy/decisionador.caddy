@@ -1,0 +1,19 @@
+# Copia canónica de /srv/edge/conf.d/decisionador.caddy en el servidor.
+# Cualquier cambio se hace aquí y se despliega con deploy.sh.
+
+decisionador.es {
+	encode zstd gzip
+	root * /etc/caddy/conf.d/static/decisionador
+	file_server
+	@mutable path / /index.html
+	header @mutable Cache-Control "no-cache"
+	@fonts path /fonts/*
+	header @fonts Cache-Control "public, max-age=31536000, immutable"
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "no-referrer"
+		X-Frame-Options "DENY"
+		-Server
+	}
+}
