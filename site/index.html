@@ -57,12 +57,12 @@ body {
 }
 
 h1 {
-	font-size: clamp(2.2rem, 9vw, 9rem);
+	font-size: clamp(2.2rem, 10vw, 9rem);
 	line-height: 0.9;
 	letter-spacing: -0.02em;
 	text-align: center;
 	color: var(--titulo);
-	text-shadow: 8px 8px 0 var(--negro);
+	text-shadow: 0.08em 0.08em 0 var(--negro);
 	overflow-wrap: break-word;
 	transition: color 80ms;
 }
@@ -77,12 +77,17 @@ h1 {
 
 output {
 	display: block;
-	font-size: clamp(4rem, 22vw, 20rem);
+	font-size: min(50vw, 42vh);
 	line-height: 0.9;
+	white-space: nowrap;
 	text-align: center;
 	color: var(--titulo);
-	text-shadow: 8px 8px 0 var(--negro);
+	text-shadow: 0.06em 0.06em 0 var(--negro);
 	transition: color 80ms;
+}
+
+output.largo {
+	font-size: min(15vw, 30vh);
 }
 
 output.pop {
@@ -100,7 +105,7 @@ output.pop {
 	gap: 3vw;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 700px) {
 	.botonera {
 		flex-direction: column;
 	}
@@ -110,7 +115,8 @@ button {
 	flex: 1;
 	font-family: inherit;
 	text-transform: uppercase;
-	font-size: clamp(1.4rem, 4vw, 3.5rem);
+	font-size: clamp(1.4rem, 3.2vw, 3.5rem);
+	white-space: nowrap;
 	color: var(--negro);
 	background: var(--caja1);
 	border: var(--borde) solid var(--negro);
@@ -140,15 +146,8 @@ button:focus-visible {
 	outline-offset: 4px;
 }
 
-footer {
-	text-align: center;
-	font-size: 0.65rem;
-	padding: 0.5em 0;
-	color: var(--negro);
-	opacity: 0.6;
-}
 
-@media (max-width: 640px) {
+@media (max-width: 700px) {
 	:root {
 		--borde: 5px;
 	}
@@ -173,7 +172,6 @@ footer {
 		<button type="button" id="btn-varias">Varias opciones</button>
 	</div>
 </div>
-<footer>decisionador.es</footer>
 <script>
 (function () {
 	"use strict";
@@ -233,6 +231,7 @@ footer {
 
 	function mostrarResultado(texto) {
 		resultado.textContent = texto;
+		resultado.classList.toggle("largo", texto.length > 2);
 		if (!reducido) {
 			resultado.classList.remove("pop");
 			void resultado.offsetWidth;
