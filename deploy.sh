@@ -57,7 +57,7 @@ else
 fi
 
 echo "==> Smoke test HTTP (se espera 200 o 308)"
-CODIGO_HTTP="$(ssh "$HOST" curl -s -o /dev/null -w '%{http_code}' -H 'Host: decisionador.es' http://127.0.0.1/)"
+CODIGO_HTTP="$(ssh "$HOST" "curl -s -o /dev/null -w '%{http_code}' -H 'Host: decisionador.es' http://127.0.0.1/")"
 if [ "$CODIGO_HTTP" = "200" ] || [ "$CODIGO_HTTP" = "308" ]; then
 	echo "==> OK: HTTP devolvió $CODIGO_HTTP"
 else
@@ -66,7 +66,7 @@ else
 fi
 
 echo "==> Smoke test HTTPS (puede fallar si el DNS aún no ha propagado)"
-if ssh "$HOST" curl -sk --resolve decisionador.es:443:127.0.0.1 https://decisionador.es/ | grep -q DECISIONADOR; then
+if ssh "$HOST" "curl -sk --resolve decisionador.es:443:127.0.0.1 https://decisionador.es/" | grep -q DECISIONADOR; then
 	echo "==> OK: el body de HTTPS contiene DECISIONADOR"
 else
 	echo "AVISO: no se pudo confirmar el contenido por HTTPS (el certificado puede no existir aún)"
