@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-HOST="${DEPLOY_HOST:-lumbre}"
+HOST="${DEPLOY_HOST:-lumbre-arm}"
 DEST=/srv/edge/conf.d/static/decisionador
 CADDY_DEST=/srv/edge/conf.d/decisionador.caddy
 CADDY_LOCAL="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/deploy/decisionador.caddy"
